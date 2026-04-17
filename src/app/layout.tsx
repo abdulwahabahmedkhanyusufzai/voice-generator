@@ -42,10 +42,12 @@ export default async function RootLayout({
 
   try {
     if (session?.user?.id) {
-      memberships = await prisma.membership.findMany({
+      const result = await prisma.membership.findMany({
         where: { userId: session.user.id },
         include: { organization: true },
       });
+      
+      memberships = result || [];
 
       if (activeOrgId) {
         currentOrg = memberships.find((m) => m.organizationId === activeOrgId)?.organization;
