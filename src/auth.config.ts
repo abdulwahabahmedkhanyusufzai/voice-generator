@@ -4,7 +4,7 @@ export const authConfig = {
   providers: [], // Providers are defined in src/auth.ts to avoid Edge Runtime issues
   pages: {
     signIn: "/sign-in",
-    signUp: "/sign-up",
+    newUser: "/sign-up",
   },
   callbacks: {
     async jwt({ token, user, trigger, session }) {

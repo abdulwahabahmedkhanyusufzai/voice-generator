@@ -111,7 +111,7 @@ model Generation{
   id String @id @default(cuid())
   orgId String
   voiceId String?
-  voice Voice @relation(fields: [voiceId], references: [id], onDelete: Cascade)
+  voice Voice? @relation(fields: [voiceId], references: [id], onDelete: Cascade)
   text String
   voiceName String
   r2ObjectKey String?
@@ -123,5 +123,4 @@ model Generation{
   updatedAt DateTime @updatedAt
 
   @@index([orgId])
-  @@index([variant])
 }
