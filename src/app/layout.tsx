@@ -40,19 +40,24 @@ export default async function RootLayout({
   let currentOrg = null;
   let memberships: any[] = [];
 
-  if (session?.user?.id) {
-    memberships = await prisma.membership.findMany({
-      where: { userId: session.user.id },
-      include: { organization: true },
-    });
+  try {
+    if (session?.user?.id) {
+      memberships = await prisma.membership.findMany({
+        where: { userId: session.user.id },
+        include: { organization: true },
+      });
 
-    if (activeOrgId) {
-      currentOrg = memberships.find((m) => m.organizationId === activeOrgId)?.organization;
-    }
+      if (activeOrgId) {
+        currentOrg = memberships.find((m) => m.organizationId === activeOrgId)?.organization;
+      }
 
-    if (!currentOrg && memberships.length > 0) {
-      currentOrg = memberships[0].organization;
+      if (!currentOrg && memberships.length > 0) {
+        currentOrg = memberships[0].organization;
+      }
     }
+  } catch (error) {
+    console.error("Layout Prisma Error:", error);
+    // Silent fail during build or session-less states
   }
 
   return (

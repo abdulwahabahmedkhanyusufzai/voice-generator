@@ -20,19 +20,36 @@ export async function DashboardView() {
         redirect("/org-selection");
     }
 
-    const organization = await prisma.organization.findUnique({
-        where: { id: activeOrgId },
-    });
+    let organization = null;
+    let memberships: any[] = [];
 
-    if (!organization) {
-        (await cookies()).delete("activeOrgId");
-        redirect("/org-selection");
+    try {
+        organization = await prisma.organization.findUnique({
+            where: { id: activeOrgId },
+        });
+
+        if (!organization) {
+            (await cookies()).delete("activeOrgId");
+            redirect("/org-selection");
+        }
+
+        memberships = await prisma.membership.findMany({
+            where: { userId: session.user.id },
+            include: { organization: true },
+        });
+    } catch (error) {
+        console.error("Dashboard Prisma Error:", error);
+        // If DB fails during build, we might still want to pre-render the shell 
+        // Or Next will handle the error. For build time pre-rendering we need 
+        // to be careful not to redirect unless we have to.
+        if (process.env.NODE_ENV === "production" && !process.env.DATABASE_URL) {
+            // Probably pre-rendering without DB
+            return <div>Loading dashboard...</div>
+        }
+        // Let it throw for actual runtime errors? Or handle it.
+        // For now, return a placeholder to avoid build crash.
+        return <div className="p-8">Unable to load dashboard data. Please check your database connection.</div>
     }
-
-    const memberships = await prisma.membership.findMany({
-        where: { userId: session.user.id },
-        include: { organization: true },
-    });
 
     return (
         <div className="h-full w-full bg-background p-4 md:p-8 flex flex-col items-start justify-start overflow-y-auto">
